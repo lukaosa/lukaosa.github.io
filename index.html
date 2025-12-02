@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Leonell Corp — Sistema de Orçamentos</title>
+  <meta name="description" content="Sistema simples para gerenciar orçamentos de projetos, compras ou serviços — Leonell Corp." />
+
+  <!-- Observação: para fins de entrega em um único arquivo incluí o CSS abaixo. Em produção prefira um arquivo CSS externo (styles.css). -->
+  <style>
+    :root{
+      --bg:#f5f7fb; --card:#ffffff; --accent:#0f6cff; --muted:#6b7280; --success:#10b981; --danger:#ef4444; --glass: rgba(255,255,255,0.6);
+      --radius:12px; --maxw:1100px;
+      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#eef2ff);color:#111827;line-height:1.4}
+    .container{max-width:var(--maxw);margin:28px auto;padding:20px}
+    header{display:flex;align-items:center;gap:16px}
+    .brand{display:flex;flex-direction:column}
+    .brand h1{margin:0;font-size:1.25rem}
+    .brand p{margin:0;color:var(--muted);font-size:0.9rem}
+
+    .grid{display:grid;grid-template-columns:1fr 420px;gap:20px;margin-top:18px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr} }
+
+    .card{background:var(--card);border-radius:var(--radius);padding:18px;box-shadow:0 6px 18px rgba(13,20,30,0.06)}
+    form .row{display:flex;gap:12px}
+    form .col{flex:1}
+    label{display:block;font-weight:600;font-size:0.85rem;margin-bottom:6px}
+    input[type=text], input[type=email], input[type=password], input[type=number], input[type=date], select, textarea{width:100%;padding:10px;border:1px solid #e6e9ef;border-radius:8px;font-size:0.95rem}
+    textarea{min-height:100px;resize:vertical}
+    .muted{color:var(--muted);font-size:0.85rem}
+
+    .actions{display:flex;gap:8px;align-items:center;margin-top:12px}
+    button{padding:10px 14px;border-radius:8px;border:0;font-weight:600;cursor:pointer}
+    button.primary{background:var(--accent);color:white}
+    button.ghost{background:transparent;border:1px solid #e6e9ef}
+    button.danger{background:var(--danger);color:white}
+
+    .list-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    table{width:100%;border-collapse:collapse;font-size:0.92rem}
+    th,td{padding:10px;text-align:left;border-bottom:1px solid #f1f3f6}
+    th{font-size:0.85rem;color:var(--muted);font-weight:600}
+    .small{font-size:0.82rem;color:var(--muted)}
+
+    .badge{display:inline-block;padding:6px 8px;border-radius:999px;background:#f3f4f6;font-weight:600;font-size:0.78rem}
+
+    .footer{margin-top:18px;text-align:center;color:var(--muted);font-size:0.9rem}
+
+    /* visual feedback for invalid fields */
+    input:invalid, textarea:invalid, select:invalid{outline:2px solid rgba(239,68,68,0.12)}
+    .error-msg{color:var(--danger);font-size:0.82rem;margin-top:6px}
+
+    /* small helpers */
+    .controls{display:flex;gap:8px;flex-wrap:wrap}
+    .search{display:flex;gap:8px;align-items:center}
+
+    /* responsive table wrapper */
+    .table-wrap{overflow:auto}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo" aria-hidden="true">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="2" y="2" width="20" height="20" rx="6" fill="#0f6cff" />
+          <path d="M7 13h10M7 9h10" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="brand">
+        <h1>Leonell Corp — Sistema de Orçamentos</h1>
+        <p class="muted">Registre e gerencie orçamentos de projetos, compras ou serviços com fornecedores e valores estimados.</p>
+      </div>
+    </header>
+
+    <main class="grid" role="main">
+      <!-- Left: Form + Lista de Orçamentos -->
+      <section class="card" aria-labelledby="form-title">
+        <h2 id="form-title">Registrar Orçamento</h2>
+        <p class="muted">Preencha os dados do orçamento. Campos marcados com * são obrigatórios.</p>
+
+        <form id="budgetForm" novalidate>
+          <fieldset style="border:0;padding:0;margin:0">
+            <legend class="small" style="margin-bottom:8px">Informações do Orçamento</legend>
+
+            <div class="row" style="margin-bottom:12px">
+              <div class="col">
+                <label for="projectName">Nome do projeto *</label>
+                <input id="projectName" name="projectName" type="text" required minlength="3" placeholder="Ex: Reforma do escritório" />
+              </div>
+              <div style="width:150px">
+                <label for="estimatedValue">Valor estimado (R$) *</label>
+                <input id="estimatedValue" name="estimatedValue" type="number" required min="0" step="0.01" placeholder="0.00" />
+              </div>
+            </div>
+
+            <div style="margin-bottom:12px">
+              <label for="description">Descrição</label>
+              <textarea id="description" name="description" maxlength="800" placeholder="Descrição das atividades / observações"></textarea>
+            </div>
+
+            <div class="row" style="margin-bottom:12px">
+              <div class="col">
+                <label for="supplierName">Fornecedor *</label>
+                <input id="supplierName" name="supplierName" type="text" required placeholder="Nome do fornecedor" />
+              </div>
+              <div class="col">
+                <label for="supplierEmail">E‑mail do fornecedor</label>
+                <input id="supplierEmail" name="supplierEmail" type="email" placeholder="contato@fornecedor.com" />
+              </div>
+            </div>
+
+            <div class="row" style="margin-bottom:12px">
+              <div class="col">
+                <label for="category">Categoria</label>
+                <select id="category" name="category">
+                  <option value="Projeto">Projeto</option>
+                  <option value="Compra">Compra</option>
+                  <option value="Serviço">Serviço</option>
+                </select>
+              </div>
+              <div style="width:160px">
+                <label for="dueDate">Data estimada</label>
+                <input id="dueDate" name="dueDate" type="date" />
+              </div>
+            </div>
+
+            <div class="row" style="margin-bottom:6px;align-items:center">
+              <div class="col">
+                <label for="priority">Prioridade</label>
+                <select id="priority" name="priority">
+                  <option value="Normal">Normal</option>
+                  <option value="Alta">Alta</option>
+                  <option value="Urgente">Urgente</option>
+                </select>
+              </div>
+              <div style="width:160px">
+                <label for="currency">Moeda</label>
+                <select id="currency" name="currency">
+                  <option>BRL</option>
+                  <option>USD</option>
+                  <option>EUR</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="actions">
+              <button type="submit" class="primary">Salvar Orçamento</button>
+              <button type="button" id="resetBtn" class="ghost">Limpar</button>
+              <button type="button" id="exportBtn" class="ghost">Exportar JSON</button>
+              <button type="button" id="importBtn" class="ghost">Importar JSON</button>
+              <input id="fileImport" type="file" accept="application/json" style="display:none" />
+            </div>
+
+            <p id="formFeedback" class="error-msg" role="status" aria-live="polite" style="display:none"></p>
+          </fieldset>
+        </form>
+
+        <hr style="margin:18px 0;border:none;border-top:1px solid #f1f3f6" />
+
+        <div class="list-header">
+          <div>
+            <h3 style="margin:0">Orçamentos Registrados</h3>
+            <p class="small">Gerencie, edite ou exclua orçamentos.</p>
+          </div>
+          <div class="controls">
+            <div class="search">
+              <label for="q" class="small" style="margin-right:6px">Pesquisar</label>
+              <input id="q" placeholder="Projeto, fornecedor, categoria..." />
+            </div>
+            <select id="filterCategory" aria-label="Filtrar por categoria">
+              <option value="">Todas</option>
+              <option>Projeto</option>
+              <option>Compra</option>
+              <option>Serviço</option>
+            </select>
+            <button id="clearStorage" class="ghost">Limpar tudo</button>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table id="budgetTable" aria-live="polite">
+            <thead>
+              <tr>
+                <th>Projeto</th>
+                <th>Valor</th>
+                <th>Fornecedor</th>
+                <th>Categoria</th>
+                <th>Data estimada</th>
+                <th class="small">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- preenchido por JS -->
+            </tbody>
+          </table>
+        </div>
+
+      </section>
+
+      <!-- Right: Área de cadastro de usuário / infos -->
+      <aside class="card" aria-labelledby="user-title">
+        <h2 id="user-title">Registro de Usuário</h2>
+        <p class="muted">Crie um usuário para acessar o sistema.</p>
+
+        <form id="signupForm" novalidate>
+          <label for="name">Nome *</label>
+          <input id="name" name="name" type="text" required minlength="3" placeholder="Seu nome completo" />
+
+          <label for="email">E‑mail *</label>
+          <input id="email" name="email" type="email" required placeholder="usuario@exemplo.com" />
+
+          <label for="password">Senha *</label>
+          <input id="password" name="password" type="password" required minlength="6" placeholder="Mínimo 6 caracteres" />
+
+          <label for="confirmPassword">Confirmar senha *</label>
+          <input id="confirmPassword" name="confirmPassword" type="password" required minlength="6" />
+
+          <div class="actions" style="margin-top:10px">
+            <button type="submit" class="primary">Registrar</button>
+            <button type="button" id="clearUser" class="ghost">Limpar</button>
+          </div>
+          <p id="signupFeedback" class="small muted" role="status" aria-live="polite"></p>
+        </form>
+
+        <hr style="margin:16px 0;border:none;border-top:1px solid #f1f3f6" />
+        <section aria-labelledby="tips-title">
+          <h3 id="tips-title">Dicas</h3>
+          <ul class="small muted">
+            <li>Use o botão <strong>Exportar JSON</strong> para salvar localmente.</li>
+            <li>Importe um arquivo JSON compatível para restaurar orçamentos.</li>
+            <li>Campos requeridos usam atributos HTML5 (required, minlength, type).</li>
+          </ul>
+        </section>
+      </aside>
+
+    </main>
+
+    <footer class="footer">
+      <small>© Leonell Corp — Sistema de Orçamentos</small>
+    </footer>
+  </div>
+
+  <script>
+    // --- Helpers e estado ---
+    const STORAGE_KEY = 'leonell_orcamentos_v1'
+    const form = document.getElementById('budgetForm')
+    const tableBody = document.querySelector('#budgetTable tbody')
+    const q = document.getElementById('q')
+    const filterCategory = document.getElementById('filterCategory')
+    const exportBtn = document.getElementById('exportBtn')
+    const importBtn = document.getElementById('importBtn')
+    const fileImport = document.getElementById('fileImport')
+    const resetBtn = document.getElementById('resetBtn')
+    const clearStorage = document.getElementById('clearStorage')
+
+    let budgets = []
+    let editId = null
+
+    // Carrega do storage
+    function load(){
+      try{
+        const raw = localStorage.getItem(STORAGE_KEY)
+        budgets = raw ? JSON.parse(raw) : []
+      }catch(e){ budgets = [] }
+    }
+
+    function save(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(budgets))
+    }
+
+    function formatCurrency(value, currency){
+      try{
+        return new Intl.NumberFormat('pt-BR',{style:'currency',currency}).format(Number(value))
+      }catch(e){return value}
+    }
+
+    // Render da tabela
+    function renderList(){
+      const term = q.value.trim().toLowerCase()
+      const category = filterCategory.value
+      tableBody.innerHTML = ''
+      const filtered = budgets.filter(b=>{
+        if(category && b.category !== category) return false
+        if(!term) return true
+        return [b.projectName, b.supplierName, b.category, b.description].some(field=>String(field||'').toLowerCase().includes(term))
+      })
+
+      if(filtered.length===0){
+        tableBody.innerHTML = '<tr><td colspan="6" class="small muted">Nenhum orçamento encontrado.</td></tr>'
+        return
+      }
+
+      filtered.forEach(b=>{
+        const tr = document.createElement('tr')
+        tr.innerHTML = `
+          <td><strong>${escapeHtml(b.projectName)}</strong><div class="small muted">${escapeHtml(b.description||'')}</div></td>
+          <td>${formatCurrency(b.estimatedValue,b.currency)}</td>
+          <td>${escapeHtml(b.supplierName)}<div class="small muted">${escapeHtml(b.supplierEmail||'')}</div></td>
+          <td>${escapeHtml(b.category)}</td>
+          <td class="small">${b.dueDate || '-'}</td>
+          <td>
+            <button data-id="${b.id}" class="ghost" aria-label="Editar">Editar</button>
+            <button data-id="${b.id}" class="danger" aria-label="Excluir">Excluir</button>
+          </td>
+        `
+        // event delegation later
+        tableBody.appendChild(tr)
+      })
+    }
+
+    function escapeHtml(text){
+      if(!text) return ''
+      return text.replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m]})
+    }
+
+    // Cria/Atualiza item
+    form.addEventListener('submit', e=>{
+      e.preventDefault()
+      const data = new FormData(form)
+      const item = Object.fromEntries(data.entries())
+      // sanitização rápida
+      if(!item.projectName || !item.estimatedValue || !item.supplierName){
+        showFormFeedback('Preencha os campos obrigatórios (*)')
+        return
+      }
+      item.estimatedValue = Number(item.estimatedValue)
+      item.id = editId || Date.now().toString()
+
+      if(editId){
+        budgets = budgets.map(b=> b.id===editId ? Object.assign({},b,item) : b)
+        editId = null
+      }else{
+        budgets.push(item)
+      }
+      save()
+      renderList()
+      form.reset()
+      showFormFeedback('',false)
+    })
+
+    resetBtn.addEventListener('click', ()=>{ form.reset(); editId=null; showFormFeedback('',false) })
+
+    // Delegation para editar/excluir
+    tableBody.addEventListener('click', e=>{
+      const btn = e.target.closest('button')
+      if(!btn) return
+      const id = btn.dataset.id
+      const isDanger = btn.classList.contains('danger')
+      const isGhost = btn.classList.contains('ghost')
+      if(isDanger){
+        if(confirm('Excluir este orçamento?')){
+          budgets = budgets.filter(b=>b.id!==id)
+          save(); renderList()
+        }
+        return
+      }
+      if(isGhost){
+        const b = budgets.find(x=>x.id===id)
+        if(!b) return
+        // Preenche o formulário para edição
+        document.getElementById('projectName').value = b.projectName
+        document.getElementById('estimatedValue').value = b.estimatedValue
+        document.getElementById('description').value = b.description || ''
+        document.getElementById('supplierName').value = b.supplierName
+        document.getElementById('supplierEmail').value = b.supplierEmail || ''
+        document.getElementById('category').value = b.category || 'Projeto'
+        document.getElementById('dueDate').value = b.dueDate || ''
+        document.getElementById('priority').value = b.priority || 'Normal'
+        document.getElementById('currency').value = b.currency || 'BRL'
+        editId = b.id
+        window.scrollTo({top:0,behavior:'smooth'})
+      }
+    })
+
+    // Busca / filtro
+    q.addEventListener('input', renderList)
+    filterCategory.addEventListener('change', renderList)
+
+    // Export / Import
+    exportBtn.addEventListener('click', ()=>{
+      const data = JSON.stringify(budgets, null, 2)
+      const blob = new Blob([data],{type:'application/json'})
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url; a.download = 'leonell_orcamentos.json'
+      a.click(); URL.revokeObjectURL(url)
+    })
+
+    importBtn.addEventListener('click', ()=> fileImport.click())
+    fileImport.addEventListener('change', e=>{
+      const f = e.target.files[0]
+      if(!f) return
+      const reader = new FileReader()
+      reader.onload = ev=>{
+        try{
+          const parsed = JSON.parse(ev.target.result)
+          if(Array.isArray(parsed)){
+            budgets = parsed.map(p=>({id:p.id||Date.now().toString()+Math.random(), ...p}))
+            save(); renderList(); alert('Importação concluída')
+          }else alert('Arquivo JSON inválido (esperado array).')
+        }catch(err){ alert('Erro ao ler JSON: '+err.message) }
+      }
+      reader.readAsText(f)
+    })
+
+    // Limpar storage
+    clearStorage.addEventListener('click', ()=>{
+      if(confirm('Remover todos os orçamentos?')){
+        budgets = []; save(); renderList()
+      }
+    })
+
+    function showFormFeedback(msg, show=true){
+      const el = document.getElementById('formFeedback')
+      el.style.display = show && msg ? 'block' : 'none'
+      el.textContent = msg
+    }
+
+    // --- Signup simples (front-end) ---
+    const signupForm = document.getElementById('signupForm')
+    signupForm.addEventListener('submit', e=>{
+      e.preventDefault()
+      const p = document.getElementById('password').value
+      const cp = document.getElementById('confirmPassword').value
+      const feedback = document.getElementById('signupFeedback')
+      if(p !== cp){ feedback.textContent = 'As senhas não coincidem.'; return }
+      // Simula gravação local (não é seguro em produção)
+      const user = {name:document.getElementById('name').value, email:document.getElementById('email').value}
+      localStorage.setItem('leonell_user', JSON.stringify(user))
+      feedback.textContent = 'Usuário registrado (simulado).'
+      signupForm.reset()
+    })
+    document.getElementById('clearUser').addEventListener('click', ()=>{ signupForm.reset(); document.getElementById('signupFeedback').textContent='' })
+
+    // Inicialização
+    load(); renderList()
+
+    // Acessibilidade: permitir submit com Enter em pesquisa
+    document.getElementById('q').addEventListener('keydown', e=>{ if(e.key==='Enter') e.preventDefault() })
+
+  </script>
+</body>
+</html>
